@@ -182,5 +182,6 @@
 ;;--------------------------------------------------
 ;; extract
 
+;; TODO remove this
 (defn extract [data pred]
   (filter pred (:items data)))

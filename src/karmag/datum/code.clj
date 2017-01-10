@@ -3,7 +3,8 @@
   (:require [karmag.datum.traversal :refer [walk]]
             [karmag.datum.whitelist :refer :all]))
 
-(def default-whitelist pure-whitelist)
+(def default-whitelist {:functions pure-function-whitelist
+                        :macros pure-macro-whitelist})
 
 (defn- mk-rep [state severity msg & {:as data}]
   {:pre [(#{:info :warn :error} severity)]}
@@ -27,7 +28,13 @@
          (walk {:report []}
                (fn [state item]
                  (cond
-                   (symbol? item) [state (get whitelist item item)]
+                   ;; macro
+                   (and (list? item) (symbol? (first item)))
+                   [state (macroexpand (get (:macros whitelist) item item))]
+                   ;; function
+                   (symbol? item)
+                   [state (get (:functions whitelist) item item)]
+                   ;; other
                    :else [state item]))
                (fn [state item]
                  (cond

@@ -1,6 +1,6 @@
 (ns karmag.datum.whitelist)
 
-(defn lookup [xs]
+(defn- lookup [xs]
   (->> xs
        (map (fn [item]
               (let [sym (if (symbol? item) item (symbol item))
@@ -9,7 +9,7 @@
                 [sym @var])))
        (into {})))
 
-(def pure-whitelist
+(def pure-function-whitelist
   "Pure clojure.core functions"
   (lookup
    '[* *' + +' - -' / < <= = == > >= apply array-map assoc assoc-in
@@ -47,3 +47,12 @@
      unchecked-subtract-int unsigned-bit-shift-right update update-in val
      vals var? vary-meta vec vector vector-of vector? volatile? with-meta
      xml-seq zero? zipmap]))
+
+(def pure-macro-whitelist
+  "Pure clojure.core macros"
+  (->> '[-> ->> and as-> case comment cond cond-> cond->> condp fn
+         for if-let if-not if-some lazy-cat lazy-seq let letfn loop or
+         some-> some->> when when-first when-let when-not when-some]
+       (map (fn [x]
+              [x (symbol (str "clojure.core/" x))]))
+       (into {})))

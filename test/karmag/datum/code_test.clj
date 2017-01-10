@@ -4,7 +4,8 @@
 
 (defn- success [form]
   (let [result (c/resolve form)]
-    (assert (empty? (:report result)))
+    (assert (empty? (:report result))
+            (str "Report not empty: " (into [] (:report result))))
     (:result result)))
 
 (defn- failure [form & check-parts]
@@ -28,3 +29,9 @@
 
 (deftest failed-resolve-test
   (is (failure '(/ 1 0) "Exception when resolving function call")))
+
+(deftest resolve-macro-test
+  (is (= [1 2 3 4 5] (success '(->> (range 5) (map inc)))))
+  (is (= '->> (success '->>)))
+  (is (= 6 (success '(->> (->> (range 3) (map inc))
+                          (reduce +))))))
