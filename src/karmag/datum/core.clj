@@ -87,7 +87,7 @@
                         :item (:item arg-stack)
                         :actual actual
                         :expected expected))]
-    (if (empty? expected)
+    (if (empty? extra)
       state
       (mk-rep state :warn (str "Extraneous arguments " extra)
               :item (:item arg-stack)

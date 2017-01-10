@@ -4,6 +4,9 @@
 
 (defn- fetch [string]
   (let [[result report] (d/process-string string)]
+    (when-not (empty? report)
+      (throw (ex-info "Report not empty"
+                      {:report report})))
     result))
 
 (deftest read-test
