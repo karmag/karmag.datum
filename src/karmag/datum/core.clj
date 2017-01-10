@@ -180,8 +180,20 @@
       expand-items))
 
 ;;--------------------------------------------------
-;; extract
+;; short-hand
 
-;; TODO remove this
-(defn extract [data pred]
-  (filter pred (:items data)))
+(defn process
+  "Returns [results, reports]. items can either be a collection of
+  objects that are accepted by clojure.java.io/reader or a single
+  such item."
+  [items & [user-config]]
+  (let [readers (if (coll? items) items [items])
+        result (build (mapcat #(read % user-config) readers))]
+    [(:items result) (:report result)]))
+
+(defn process-string
+  "Same as process but will wrap the items argument in from-string."
+  [items & [user-config]]
+  (if (string? items)
+    (process (from-string items) user-config)
+    (process (map from-string items) user-config)))

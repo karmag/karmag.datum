@@ -1,7 +1,6 @@
 (defproject karmag.datum "0.2.0-SNAPSHOT"
-  :description "Embedded substitution and manipulation for EDN"
-  :url "http://example.com/FIXME"
+  :description "Tag-driven substitution and manipulation for EDN"
+  :url "https://github.com/karmag/datum"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]]
-  :test-selectors {:debug :debug})
+  :dependencies [[org.clojure/clojure "1.8.0"]])

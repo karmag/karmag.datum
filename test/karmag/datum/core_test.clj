@@ -3,7 +3,8 @@
             [karmag.datum.core :as d]))
 
 (defn- fetch [string]
-  (-> (d/from-string string) d/read d/build (d/extract identity)))
+  (let [[result report] (d/process-string string)]
+    result))
 
 (deftest read-test
   (are [str data] (= (d/read (d/from-string str)) data)
