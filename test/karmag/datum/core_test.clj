@@ -77,4 +77,6 @@
   (is (= (fetch "#def [:a #code (/ 1 2)] #ref :a")
          [1/2]))
   (is (= (fetch "#code(->> (range 5) (filter odd?))")
-         [[1 3]])))
+         [[1 3]]))
+  (is (= (fetch "#code(+ 5 10 #code(int \\a))")
+         [112])))
