@@ -16,7 +16,7 @@
 
 ;; TODO do not allow more keys than what is recognized by parser
 
-(def default-read-config
+(def default-config
   {:readers {'def #(if (map? %)
                      (Def. (:id %) (:value %) (:default %))
                      (Def. (first %) (second %) (nth % 2 nil)))
@@ -26,7 +26,17 @@
                      :else (Ref. % nil))
              'arg ->Arg
              'code ->Code}
-   :default vector})
+   :default vector
+   :whitelist code/default-whitelist})
+
+;; TODO testing for this
+
+(def namespace-config
+  (update-in default-config [:readers]
+             #(reduce (fn [m [k v]]
+                        (assoc m (symbol (str "karmag.datum/" k)) v))
+                      %
+                      %)))
 
 ;;--------------------------------------------------
 ;; utils
@@ -54,7 +64,7 @@
   [r & [user-config]]
   (with-open [reader (io/reader r)
               pbr (PushbackReader. reader)]
-    (let [opts (merge default-read-config user-config {:eof ::eof})]
+    (let [opts (merge default-config user-config {:eof ::eof})]
       (->> #(edn/read opts pbr)
            repeatedly
            (take-while #(not= ::eof %))
@@ -197,3 +207,9 @@
   (if (string? items)
     (process (from-string items) user-config)
     (process (map from-string items) user-config)))
+
+;; TODO process* functions - just returns the result part, any
+;; warnings or errors are thrown instead.
+
+;; TODO should have function for rendering error messages in a more
+;; human-readable format.
