@@ -4,7 +4,8 @@
             [clojure.java.io :as io]
             [clojure.set]
             [karmag.datum.code :as code]
-            [karmag.datum.traversal :refer [walk walk-post]])
+            [karmag.datum.traversal :refer [walk walk-post]]
+            [karmag.datum.util :refer [mk-rep]])
   (:import java.io.PushbackReader))
 
 (declare expand-single)
@@ -45,12 +46,6 @@
 (defn- ref? [x] (instance? Ref x))
 (defn- arg? [x] (instance? Arg x))
 (defn- code? [x] (instance? Code x))
-
-(defn- mk-rep [state severity msg & {:as data}]
-  {:pre [(#{:info :warn :error} severity)]}
-  (update-in state [:report] conj {:message msg
-                                   :severity severity
-                                   :data data}))
 
 ;;--------------------------------------------------
 ;; read
@@ -126,13 +121,11 @@
                     (update-in [:arg-stack] next))
                 state)]
     (cond
-      (code? item) (let [result (code/resolve (:form item))]
-                     (if (empty? (:report result))
-                       [state (:result result)]
-                       [(mk-rep state :error "Code expansion failed"
-                                :errors (:report result))
-                        (:result result)]))
-      ;; TODO replace :report with :logs
+      (code? item) (let [{:keys [result report]} (code/resolve (:form item))]
+                     (if (empty? report)
+                       [state result]
+                       [(mk-rep state :error "Code expansion failed")
+                        result]))
       :else [state item])))
 
 (defn- expand-single

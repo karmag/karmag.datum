@@ -1,24 +1,19 @@
 (ns karmag.datum.code
   (:refer-clojure :exclude [resolve])
   (:require [karmag.datum.traversal :refer [walk]]
+            [karmag.datum.util :refer [mk-rep]]
             [karmag.datum.whitelist :refer :all]))
 
 (def default-whitelist {:functions pure-function-whitelist
                         :macros pure-macro-whitelist})
 
-(defn- mk-rep [state severity msg & {:as data}]
-  {:pre [(#{:info :warn :error} severity)]}
-  (update-in state [:report] conj {:message msg
-                                   :severity severity
-                                   :data data}))
-
 (defn- resolve-run [state form]
   (try [state (apply (first form) (rest form))]
        (catch Throwable t
          [(mk-rep state :error "Exception when resolving function call"
-                  :exception (Throwable->map t)
+                  :exception t
                   :form form)
-          form])))
+          :karmag.datum.error/unresolved-code])))
 
 (defn resolve
   ([form]
