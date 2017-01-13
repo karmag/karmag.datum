@@ -80,3 +80,10 @@
          [[1 3]]))
   (is (= (fetch "#code(+ 5 10 #code(int \\a))")
          [112])))
+
+(deftest configuration-test
+  (is (= (d/process-string "#def [:a #code(+ 1 #arg :i)] #ref [:a {:i 10}]")
+         (d/process-string
+          ["#karmag.datum/def [:a #karmag.datum/code(+ 1 #karmag.datum/arg :i)]"
+           "#karmag.datum/ref [:a {:i 10}]"]
+          d/namespace-config))))

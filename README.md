@@ -27,7 +27,23 @@ needed `from-string` can be used.
     (process-string ["[1 2 3]", "hello"]) => [result, report]
 
 An optional second argument may be given that specifies additional
-configuration options.
+configuration options. Two basic configuration are
+supplied. `default-config` and `namespace-config`. The default
+config uses non-namespaced tags while the namespaced uses tags in
+the karmag.datum namespace.
+
+    (require '[karmag.datum.core
+               :refer [process-string default-config namespace-config]])
+
+    (process-string "#code(+ 1 2)" default-config)
+    (process-string "#karmag.datum/code(+ 1 2)" namespace-config)
+
+The configurations are maps where the keys :readers and :default
+are interpreted as the corresponding key in a `clojure.edn/read`
+call. The default :default is `vector`.
+
+    (process-string "#tag #nested data")
+    ;; => ([tag [nested data]])
 
 ### Data substitution
 
@@ -47,11 +63,12 @@ into nil if nested deeper. Non root defs generate warnings.
     ;;   :severity :warn,
     ;;   :data <additional-data>}]
 
-Both *def* and *ref* accept an extra argument that handles
-arguments. If given for *def* it will be used as a default argument
-if non is given. If given for *ref* it will use that as the
-substitution value. If both *ref* argument and default argument is
-missing a warning is generated and the value becomes `nil`.
+Both **def** and **ref** accept an extra argument that handles
+arguments. If given for **def** it will be used as a default
+argument if non is given. If given for **ref** it will use that as
+the substitution value. If both **ref** argument and default
+argument is missing a warning is generated and the value becomes
+`nil`.
 
     (process-string "#def [:x [hello #arg :item]], #ref [:x {:item world}]")
     ;; => ([hello world])

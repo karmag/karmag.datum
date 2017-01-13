@@ -30,8 +30,6 @@
    :default vector
    :whitelist code/default-whitelist})
 
-;; TODO testing for this
-
 (def namespace-config
   (update-in default-config [:readers]
              #(reduce (fn [m [k v]]
