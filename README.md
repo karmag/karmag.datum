@@ -6,8 +6,8 @@ This project uses [semantic versioning](http://semver.org/).
 
 ## Usage
 
-The basics of datum revolves around the *process* commands. They
-all take the form of *process-x* => `[result, report]`. In this
+The basics of datum revolves around the `process` commands. They
+all take the form of `process... => [result, report]`. In this
 documentation results and reports are expanded separately for
 readability. If there are no reports reports are not shown.
 
@@ -17,6 +17,17 @@ argument types in the same type as
 `clojure.java.io/reader`. `process-string` will treat arguments as
 string data and wrap them in readers. If individual wrapping is
 needed `from-string` can be used.
+
+    (require '[karmag.datum.core
+               :refer [process process-string from-string]])
+
+    (process file)                        => [result, report]
+    (process [url, (from-string "edn")])  => [result, report]
+    (process-string "[1 2 3]")            => [result, report]
+    (process-string ["[1 2 3]", "hello"]) => [result, report]
+
+An optional second argument may be given that specifies additional
+configuration options.
 
 ### Data substitution
 

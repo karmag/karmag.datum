@@ -28,8 +28,8 @@
 
    "## Usage"
 
-   "The basics of datum revolves around the *process* commands. They
-   all take the form of *process-x* => `[result, report]`. In this
+   "The basics of datum revolves around the `process` commands. They
+   all take the form of `process... => [result, report]`. In this
    documentation results and reports are expanded separately for
    readability. If there are no reports reports are not shown."
 
@@ -40,8 +40,18 @@
    string data and wrap them in readers. If individual wrapping is
    needed `from-string` can be used."
 
-   ;; TODO example of different way to use it here (one arg, many
-   ;; args, config change)
+   [:code ["(require '[karmag.datum.core"
+           "           :refer [process process-string from-string]])"
+           ""
+           "(process file)                        => [result, report]"
+           "(process [url, (from-string \"edn\")])  => [result, report]"
+           "(process-string \"[1 2 3]\")            => [result, report]"
+           "(process-string [\"[1 2 3]\", \"hello\"]) => [result, report]"]]
+
+   "An optional second argument may be given that specifies additional
+   configuration options."
+
+   ;; TODO config documentation (default, namespaced)
 
    "### Data substitution"
 
@@ -114,10 +124,17 @@
         (do (.write writer (->> part lines (map #(.trim %)) unlines))
             (.write writer "\n\n"))
         ;; example
-        (and (vector? part)
-             (= :example (first part)))
+        (and (vector? part) (-> part first (= :example)))
         (do (.write writer (render-example (second part)))
             (.write writer "\n\n"))
+        ;; code
+        (and (vector? part) (-> part first (= :code)))
+        (do (doseq [line (second part)]
+              (if (empty? line)
+                (.write writer "\n")
+                (do (.write writer (indent "    " line))
+                    (.write writer "\n"))))
+            (.write writer "\n"))
         ;; error
         :else
         (throw (ex-info (str "Unknown document part: " part)
