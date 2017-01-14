@@ -86,4 +86,15 @@
          (d/process-string
           ["#karmag.datum/def [:a #karmag.datum/code(+ 1 #karmag.datum/arg :i)]"
            "#karmag.datum/ref [:a {:i 10}]"]
-          d/namespace-config))))
+          d/namespace-config)
+         [[11] []]))
+  (testing "default tag handler"
+    (is (= (d/process-string "#tag-a #tag-b item"
+                             (assoc d/default-config :default
+                                    #(hash-map :tag %1 :item %2)))
+           '[[{:tag tag-a
+                :item {:tag tag-b
+                       :item item}}]
+             []])))
+  (is (= (fetch "#tag-a #tag-b item")
+         '[[tag-a [tag-b item]]])))

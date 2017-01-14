@@ -48,6 +48,9 @@
 ;;--------------------------------------------------
 ;; read
 
+;; TODO rename read so that this namespace could be use with :refer
+;; :all without colliding with clojure.core
+
 (defn read
   "Takes a reader and optional user config. The reader accepts any
   type that clojure.java.io/reader accepts. The user config may be
