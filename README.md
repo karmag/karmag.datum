@@ -43,41 +43,40 @@ are interpreted as the corresponding key in a `clojure.edn/read`
 call. The default :default is `vector`.
 
     (process-string "#tag #nested data")
-    ;; => ([tag [nested data]])
+    ;; => [[tag [nested data]]]
 
 ### Data substitution
 
 `#def` and `#ref` are the basic building blocks for substitution.
 
     (process-string "#def [:x 5], #ref :x")
-    ;; => (5)
+    ;; => [5]
 
 `#def` on the root level are removed from the output and turned
 into nil if nested deeper. Non root defs generate warnings.
 
     (process-string "#def [:x 5] [#def [:y 10]]")
-    ;; => ([{:id :y, :value 10, :default nil}])
+    ;; => [[nil]]
 
     ;; errors =>
     ;; [{:message "Definition in non-root position",
     ;;   :severity :warn,
     ;;   :data <additional-data>}]
 
-Both **def** and **ref** accept an extra argument that handles
-arguments. If given for **def** it will be used as a default
-argument if non is given. If given for **ref** it will use that as
-the substitution value. If both **ref** argument and default
-argument is missing a warning is generated and the value becomes
-`nil`.
+Both `def` and `ref` accept an extra argument that handles
+arguments. If given for `def` it will be used as a default argument
+if non is given. If given for `ref` it will use that as the
+substitution value. If both `ref` argument and default argument is
+missing a warning is generated and the value becomes `nil`.
 
     (process-string "#def [:x [hello #arg :item]], #ref [:x {:item world}]")
-    ;; => ([hello world])
+    ;; => [[hello world]]
 
     (process-string "#def [:x [hello #arg :item] {:item you}], #ref :x")
-    ;; => ([hello you])
+    ;; => [[hello you]]
 
     (process-string "#def [:x [hello #arg :item]], #ref :x")
-    ;; => ([hello nil])
+    ;; => [[hello nil]]
 
     ;; errors =>
     ;; [{:message "No replacement defined for (:item)",
@@ -92,12 +91,12 @@ functions and macros from the `clojure.core` namespace
 are whitelisted.
 
     (process-string "#code(+ 15 (/ 1 2))")
-    ;; => (31/2)
+    ;; => [31/2]
 
 Trying to execute non whitelisted code generates an error.
 
     (process-string "#code(defrecord Alpha [a b c])")
-    ;; => (:karmag.datum.error/unresolved-code)
+    ;; => [:karmag.datum.error/unresolved-code]
 
     ;; errors =>
     ;; [{:message "Code expansion failed",

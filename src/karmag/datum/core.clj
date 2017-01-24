@@ -141,25 +141,29 @@
   "Extracts definitions as a sequence. Definitions found are removed
   from the item listing. Non-root definitions are replaced with nil."
   [state]
-  (let [add-def #(update-in %1 [:defs] conj %2)]
-    (-> (reduce
-         (fn [state original-item]
-           (first
-            (walk-post state
-                       (fn [state item]
-                         (if (def? item)
-                           (if (= original-item item)
-                             [(add-def state item) item]
-                             [(-> (add-def state item)
-                                  (mk-rep :warn "Definition in non-root position"
-                                          :root-item original-item
-                                          :item item))
-                              nil])
-                           [state item]))
-                       original-item)))
-         state
-         (:items state))
-        (update-in [:items] (partial filter (comp not def?))))))
+  (let [add-def #(update-in %1 [:defs] conj %2)
+        [state items]
+        (reduce
+         (fn [[state result-items] original-item]
+           (let [[state transformed-item]
+                 (walk-post state
+                            (fn [state item]
+                              (if (def? item)
+                                (if (= original-item item)
+                                  [(add-def state item) item]
+                                  [(-> (add-def state item)
+                                       (mk-rep :warn "Definition in non-root position"
+                                               :root-item original-item
+                                               :item item))
+                                   nil])
+                                [state item]))
+                            original-item)]
+             [state (if (def? transformed-item)
+                      result-items
+                      (conj result-items transformed-item))]))
+         [state []]
+         (:items state))]
+    (assoc state :items items)))
 
 (defn- aggregate-defs
   "Make definitions lookup friendly."

@@ -4,8 +4,10 @@
             [clojure.test :refer :all]
             [karmag.datum.core :refer [process-string]]))
 
-(defn make-example [data]
+(defn- make-example [data & {:keys [expected]}]
   (let [[result report] (process-string data)]
+    (when expected
+      (assert (= result expected) (str "Expected " expected " but was " result)))
     {:code (list 'process-string data)
      :result result
      :report (when-not (empty? report)
@@ -64,30 +66,33 @@
    are interpreted as the corresponding key in a `clojure.edn/read`
    call. The default :default is `vector`."
 
-   [:example (make-example "#tag #nested data")]
+   [:example (make-example "#tag #nested data"
+                           :expected '[[tag [nested data]]])]
 
    "### Data substitution"
 
    "`#def` and `#ref` are the basic building blocks for substitution."
-   [:example (make-example "#def [:x 5], #ref :x")]
-
-   ;; TODO replace non root defs with nil
+   [:example (make-example "#def [:x 5], #ref :x"
+                           :expected [5])]
 
    "`#def` on the root level are removed from the output and turned
    into nil if nested deeper. Non root defs generate warnings."
-   [:example (make-example "#def [:x 5] [#def [:y 10]]")]
+   [:example (make-example "#def [:x 5] [#def [:y 10]]"
+                           :expected [[nil]])]
 
-   "Both **def** and **ref** accept an extra argument that handles
-   arguments. If given for **def** it will be used as a default
-   argument if non is given. If given for **ref** it will use that as
-   the substitution value. If both **ref** argument and default
-   argument is missing a warning is generated and the value becomes
-   `nil`."
-   [:example (make-example "#def [:x [hello #arg :item]], #ref [:x {:item world}]")]
+   "Both `def` and `ref` accept an extra argument that handles
+   arguments. If given for `def` it will be used as a default argument
+   if non is given. If given for `ref` it will use that as the
+   substitution value. If both `ref` argument and default argument is
+   missing a warning is generated and the value becomes `nil`."
+   [:example (make-example "#def [:x [hello #arg :item]], #ref [:x {:item world}]"
+                           :result '[[hello world]])]
 
-   [:example (make-example "#def [:x [hello #arg :item] {:item you}], #ref :x")]
+   [:example (make-example "#def [:x [hello #arg :item] {:item you}], #ref :x"
+                           :result '[[hello you]])]
 
-   [:example (make-example "#def [:x [hello #arg :item]], #ref :x")]
+   [:example (make-example "#def [:x [hello #arg :item]], #ref :x"
+                           :result '[[hello nil]])]
 
    "### Code"
 
@@ -95,10 +100,12 @@
    have to be whitelisted for code tag to work. By default pure
    functions and macros from the `clojure.core` namespace
    are whitelisted."
-   [:example (make-example "#code(+ 15 (/ 1 2))")]
+   [:example (make-example "#code(+ 15 (/ 1 2))"
+                           :result [31/2])]
 
    "Trying to execute non whitelisted code generates an error."
-   [:example (make-example "#code(defrecord Alpha [a b c])")]
+   [:example (make-example "#code(defrecord Alpha [a b c])"
+                           :result [:karmag.datum.error/unresolved-code])]
 
    ;; TODO whitelisting guide
 
