@@ -1,4 +1,4 @@
-(defproject karmag.datum "0.2.0-SNAPSHOT"
+(defproject karmag/datum "0.3.0-SNAPSHOT"
   :description "Tag-driven substitution and manipulation for EDN"
   :url "https://github.com/karmag/datum"
   :license {:name "Eclipse Public License"
